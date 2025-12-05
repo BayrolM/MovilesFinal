@@ -13,7 +13,7 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
-  final String _baseUrl = BASE_URL;
+  final String _baseUrl = baseUrl;
 
   Map<String, String> _headers() {
     return {'Content-Type': 'application/json', 'Accept': 'application/json'};
@@ -42,6 +42,22 @@ class ApiClient {
     );
     try {
       final response = await http.get(uri, headers: _headers());
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('Error de red', 500);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<dynamic> post(String endpoint, {Map<String, dynamic>? body}) async {
+    final uri = Uri.parse('$_baseUrl$endpoint');
+    try {
+      final response = await http.post(
+        uri,
+        headers: _headers(),
+        body: json.encode(body),
+      );
       return _handleResponse(response);
     } on SocketException {
       throw ApiException('Error de red', 500);
