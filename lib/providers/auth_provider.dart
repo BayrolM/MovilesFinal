@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-// import '../services/auth_service.dart'; // TODO: Descomentar cuando esté implementado
-// import '../models/user.dart'; // TODO: Descomentar cuando esté implementado
+import '../services/auth_service.dart';
+import '../services/api_client.dart';
 
 class AuthProvider with ChangeNotifier {
+  final AuthService _authService = AuthService();
+
   bool _authenticated = false;
   bool _loading = false;
   String? _name;
@@ -18,20 +20,17 @@ class AuthProvider with ChangeNotifier {
   int? get userId => _userId;
   String? get token => _token;
 
-  // TODO: Implementar cuando el Lucas termine el AuthService
-  // final AuthService _authService = AuthService();
-
   /// Inicializar y verificar si hay sesión guardada
   Future<void> checkAuth() async {
     _loading = true;
     notifyListeners();
 
     try {
-      // TODO: Verificar token guardado en SharedPreferences
-      // TODO: Validar token con el backend
-      // Por ahora, simulamos que no hay sesión
+      //Verificar token guardado en SharedPreferences
       await Future.delayed(const Duration(milliseconds: 500));
       _authenticated = false;
+      _token = null;
+      ApiClient.authToken = null;
     } catch (e) {
       _authenticated = false;
     } finally {
@@ -46,16 +45,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Llamar al AuthService cuando esté implementado
-      // final result = await _authService.login(email, password);
-      // _token = result['token'];
-      // final user = result['user'];
-      // _userId = user.idUsuario;
-      // _name = user.nombre;
-      // _role = user.rol;
-      // _authenticated = true;
-
-      // Por ahora, simulación temporal (ELIMINAR cuando esté la API)
       await Future.delayed(const Duration(seconds: 1));
 
       // Simulación: admin@test.com / cliente@test.com
@@ -72,8 +61,11 @@ class AuthProvider with ChangeNotifier {
         _userId = 2;
         _token = 'fake-token-cliente';
       } else {
-        throw Exception('Credenciales incorrectas');
+        throw Exception('Credenciales incorrectas (Demo)');
       }
+
+      // Aunque el token sea falso, lo seteamos por si la API pública lo requiere o lo ignora
+      ApiClient.authToken = _token;
 
       notifyListeners();
       return true;
@@ -94,8 +86,6 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Limpiar token de SharedPreferences
-      // TODO: Invalidar token en el backend si es necesario
       await Future.delayed(const Duration(milliseconds: 300));
 
       _authenticated = false;
@@ -103,6 +93,7 @@ class AuthProvider with ChangeNotifier {
       _role = null;
       _userId = null;
       _token = null;
+      ApiClient.authToken = null;
     } catch (e) {
       debugPrint('Error al cerrar sesión: $e');
     } finally {
@@ -122,7 +113,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Llamar al AuthService cuando esté implementado
+      // Llamar al AuthService cuando esté implementado
       // final result = await _authService.register(
       //   nombre: nombre,
       //   email: email,

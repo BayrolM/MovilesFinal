@@ -3,7 +3,7 @@ import '../models/cart_item.dart';
 
 class OrderService {
   final ApiClient _apiClient = ApiClient();
-  final String _endpoint = '/api/sales';
+  final String _endpoint = '/api/orders';
 
   /// Crear una nueva venta/orden
   ///

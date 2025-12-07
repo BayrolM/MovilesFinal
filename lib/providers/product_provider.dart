@@ -36,6 +36,8 @@ class ProductProvider with ChangeNotifier {
       final result = await _productService.listarProductos(effectiveFilters);
 
       _products = result['items'];
+      // Ordenar por ID ascendente para visualización
+      _products.sort((a, b) => a.idProducto.compareTo(b.idProducto));
       _totalPages = result['totalPages'];
     } catch (e) {
       debugPrint('Error al cargar los productos: $e');

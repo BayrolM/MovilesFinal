@@ -20,7 +20,7 @@ class _ClientMainScreenState extends State<ClientMainScreen> {
   final List<Widget> _screens = [
     const CatalogScreen(),
     const CartScreen(),
-    const ProfileScreen(), // TODO: Crear pantalla de perfil
+    const ProfileScreen(),
   ];
 
   @override
