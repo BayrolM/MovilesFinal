@@ -1,7 +1,9 @@
+// ...existing code...
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,6 +43,14 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     }
+  }
+
+  void _goToRegister() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const RegisterScreen(),
+      ),
+    );
   }
 
   @override
@@ -203,48 +213,36 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 12),
 
-                      // Nota de desarrollo
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue.shade200),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  size: 16,
-                                  color: Colors.blue.shade700,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Credenciales de prueba:',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade700,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                      // Botón Registro
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton(
+                          onPressed: auth.loading ? null : _goToRegister,
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                              color: AppColors.pinkDark,
+                              width: 2,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Admin: admin@test.com / 123456\n'
-                              'Cliente: cliente@test.com / 123456',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.blue.shade900,
-                              ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ],
+                          ),
+                          child: const Text(
+                            'CREAR CUENTA',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.pinkDark,
+                            ),
+                          ),
                         ),
                       ),
+
+                      const SizedBox(height: 24),
+                      // Recuadro de credenciales eliminado intencionadamente.
                     ],
                   ),
                 ),

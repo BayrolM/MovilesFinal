@@ -109,19 +109,19 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        if (auth.name != null)
+                        if (auth.user?.nombreCompleto != null)
                           Text(
-                            'Hola, ${auth.name!}',
+                            'Hola, ${auth.user?.nombreCompleto}',
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                             ),
                           ),
-                        if (auth.role != null) ...[
+                        if (auth.authenticated) ...[
                           const SizedBox(width: 8),
                           Chip(
                             label: Text(
-                              auth.role!.toUpperCase(),
+                              auth.role.toUpperCase(),
                               style: const TextStyle(fontSize: 10),
                             ),
                             backgroundColor: AppColors.pinkLight,

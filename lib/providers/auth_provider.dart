@@ -4,20 +4,25 @@ import '../services/api_client.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../models/user.dart';
+import '../services/auth_service.dart';
+
+const String _tokenKey = 'jwt_token';
+
+class AuthProvider with ChangeNotifier {
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  late final AuthService _authService;
 
   bool _authenticated = false;
   bool _loading = false;
-  String? _name;
-  String? _role;
-  int? _userId;
+  User? _user;
   String? _token;
 
   // Getters
   bool get authenticated => _authenticated;
   bool get loading => _loading;
-  String? get name => _name;
-  String? get role => _role;
-  int? get userId => _userId;
+  User? get user => _user;
   String? get token => _token;
 
   /// Inicializar y verificar si hay sesión guardada
@@ -33,14 +38,16 @@ class AuthProvider with ChangeNotifier {
       ApiClient.authToken = null;
     } catch (e) {
       _authenticated = false;
+      _token = null;
+      _user = null;
     } finally {
       _loading = false;
       notifyListeners();
     }
   }
 
-  /// Login
-  Future<bool> login(String email, String password) async {
+  /// Iniciar sesión
+  Future<void> login(String email, String password) async {
     _loading = true;
     notifyListeners();
 
@@ -70,9 +77,10 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      print('❌ Error en login: $e');
       _authenticated = false;
-      _loading = false;
-      notifyListeners();
+      _token = null;
+      _user = null;
       rethrow;
     } finally {
       _loading = false;
@@ -80,8 +88,19 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Logout
-  Future<void> logout() async {
+  /// Registrar nuevo usuario
+  Future<void> register({
+    required String nombres,
+    required String apellidos,
+    required String email,
+    required String password,
+    required String tipoDocumento,
+    required String documento,
+    required String telefono,
+    required String direccion,
+    required String ciudad,
+    int idRol = 2,
+  }) async {
     _loading = true;
     notifyListeners();
 
@@ -89,9 +108,6 @@ class AuthProvider with ChangeNotifier {
       await Future.delayed(const Duration(milliseconds: 300));
 
       _authenticated = false;
-      _name = null;
-      _role = null;
-      _userId = null;
       _token = null;
       ApiClient.authToken = null;
     } catch (e) {
@@ -102,13 +118,8 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Registro (para cuando se implemente)
-  Future<bool> register({
-    required String nombre,
-    required String email,
-    required String password,
-    String? telefono,
-  }) async {
+  /// Cerrar sesión
+  Future<void> logout() async {
     _loading = true;
     notifyListeners();
 

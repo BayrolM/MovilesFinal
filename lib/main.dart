@@ -111,9 +111,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     // Si está autenticado, redirige según el rol
     if (auth.role == 'admin') {
+      print('🔑 Detectado ADMIN - Redirigiendo a AdminMainScreen');
       return const AdminMainScreen();
     } else {
       // Para clientes y cualquier otro rol
+      print('👥 Detectado CLIENTE - Redirigiendo a ClientMainScreen');
       return const ClientMainScreen();
     }
   }
