@@ -86,12 +86,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         scrollDirection: Axis.horizontal,
                         child: DataTable(
                           headingRowColor: MaterialStateProperty.all(
-                            AppColors.pinkLight.withOpacity(0.5),
+                            AppColors.pinkLight.withValues(alpha: 0.5),
                           ),
                           dataRowColor: MaterialStateProperty.resolveWith((
                             states,
                           ) {
-                            return Colors.white; // Default to white
+                            return Colors.white;
                           }),
                           columnSpacing: 20,
                           horizontalMargin: 20,
@@ -193,8 +193,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: product.stockActual > 5
-                                          ? Colors.green.withOpacity(0.1)
-                                          : Colors.red.withOpacity(0.1),
+                                          ? Colors.green.withValues(alpha: 0.1)
+                                          : Colors.red.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -216,8 +216,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: product.estado
-                                          ? Colors.blue.withOpacity(0.1)
-                                          : Colors.grey.withOpacity(0.1),
+                                          ? Colors.blue.withValues(alpha: 0.1)
+                                          : Colors.grey.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -242,7 +242,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                           size: 20,
                                         ),
                                         onPressed: () {
-                                          // TODO: Navegar a editar
+                                          // Navegar a editar
                                         },
                                       ),
                                       IconButton(
@@ -252,7 +252,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                           size: 20,
                                         ),
                                         onPressed: () {
-                                          // TODO: Eliminar
+                                          //Eliminar
                                         },
                                       ),
                                     ],
@@ -303,7 +303,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Navegar a crear producto
+          //  Navegar a crear producto
         },
         backgroundColor: AppColors.pinkPrimary,
         child: const Icon(Icons.add, color: AppColors.white),
