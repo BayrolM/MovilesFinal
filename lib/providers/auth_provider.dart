@@ -1,86 +1,110 @@
+// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
-// import '../services/auth_service.dart'; // TODO: Descomentar cuando esté implementado
-// import '../models/user.dart'; // TODO: Descomentar cuando esté implementado
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../models/user.dart';
+import '../services/auth_service.dart';
+
+const String _tokenKey = 'jwt_token';
 
 class AuthProvider with ChangeNotifier {
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  late final AuthService _authService;
+
   bool _authenticated = false;
   bool _loading = false;
-  String? _name;
-  String? _role;
-  int? _userId;
+  User? _user;
   String? _token;
 
   // Getters
   bool get authenticated => _authenticated;
   bool get loading => _loading;
-  String? get name => _name;
-  String? get role => _role;
-  int? get userId => _userId;
+  User? get user => _user;
   String? get token => _token;
 
-  // TODO: Implementar cuando el Lucas termine el AuthService
-  // final AuthService _authService = AuthService();
+  /// Retorna el rol del usuario ('admin' o 'cliente')
+  String get role {
+    if (_user?.idRol == 1) {
+      return 'admin';
+    }
+    return 'cliente';
+  }
 
-  /// Inicializar y verificar si hay sesión guardada
+  AuthProvider() {
+    _authService = AuthService();
+    checkAuth();
+  }
+
+
+  /// Verificar si hay una sesión guardada al iniciar la app
   Future<void> checkAuth() async {
     _loading = true;
     notifyListeners();
 
     try {
-      // TODO: Verificar token guardado en SharedPreferences
-      // TODO: Validar token con el backend
-      // Por ahora, simulamos que no hay sesión
-      await Future.delayed(const Duration(milliseconds: 500));
-      _authenticated = false;
+      final savedToken = await _secureStorage.read(key: _tokenKey);
+      if (savedToken != null) {
+        try {
+          // Validar el token obteniendo el perfil
+          final profile = await _authService.getProfile(savedToken);
+          _token = savedToken;
+          _user = profile;
+          _authenticated = true;
+        } catch (e) {
+          // Token inválido o expirado
+          await _secureStorage.delete(key: _tokenKey);
+          _authenticated = false;
+          _token = null;
+          _user = null;
+        }
+      } else {
+        _authenticated = false;
+        _token = null;
+        _user = null;
+      }
     } catch (e) {
       _authenticated = false;
+      _token = null;
+      _user = null;
     } finally {
       _loading = false;
       notifyListeners();
     }
   }
 
-  /// Login
-  Future<bool> login(String email, String password) async {
+  /// Iniciar sesión
+  Future<void> login(String email, String password) async {
     _loading = true;
     notifyListeners();
 
     try {
-      // TODO: Llamar al AuthService cuando esté implementado
-      // final result = await _authService.login(email, password);
-      // _token = result['token'];
-      // final user = result['user'];
-      // _userId = user.idUsuario;
-      // _name = user.nombre;
-      // _role = user.rol;
-      // _authenticated = true;
+      // 1. Obtener token
+      final result = await _authService.login(email: email, password: password);
+      final token = result['token'] as String?;
 
-      // Por ahora, simulación temporal (ELIMINAR cuando esté la API)
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Simulación: admin@test.com / cliente@test.com
-      if (email == 'admin@test.com' && password == '123456') {
-        _authenticated = true;
-        _name = 'Administrador';
-        _role = 'admin';
-        _userId = 1;
-        _token = 'fake-token-admin';
-      } else if (email == 'cliente@test.com' && password == '123456') {
-        _authenticated = true;
-        _name = 'Cliente Demo';
-        _role = 'cliente';
-        _userId = 2;
-        _token = 'fake-token-cliente';
-      } else {
-        throw Exception('Credenciales incorrectas');
+      if (token == null) {
+        throw Exception('Token no recibido del servidor');
       }
 
-      notifyListeners();
-      return true;
+      // 2. Obtener perfil del usuario
+      _user = await _authService.getProfile(token);
+      _token = token;
+
+      // DEBUG
+      print('✅ Login exitoso');
+      print('📧 Email: ${_user?.email}');
+      print('👤 Nombre: ${_user?.nombreCompleto}');
+      print('🔑 ID Rol: ${_user?.idRol}');
+      print('👑 Rol: $role');
+
+      // 3. Guardar token en almacenamiento seguro
+      await _secureStorage.write(key: _tokenKey, value: token);
+
+      _authenticated = true;
     } catch (e) {
+      print('❌ Error en login: $e');
       _authenticated = false;
-      _loading = false;
-      notifyListeners();
+      _token = null;
+      _user = null;
       rethrow;
     } finally {
       _loading = false;
@@ -88,60 +112,67 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Logout
-  Future<void> logout() async {
-    _loading = true;
-    notifyListeners();
-
-    try {
-      // TODO: Limpiar token de SharedPreferences
-      // TODO: Invalidar token en el backend si es necesario
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      _authenticated = false;
-      _name = null;
-      _role = null;
-      _userId = null;
-      _token = null;
-    } catch (e) {
-      debugPrint('Error al cerrar sesión: $e');
-    } finally {
-      _loading = false;
-      notifyListeners();
-    }
-  }
-
-  /// Registro (para cuando se implemente)
-  Future<bool> register({
-    required String nombre,
+  /// Registrar nuevo usuario
+  Future<void> register({
+    required String nombres,
+    required String apellidos,
     required String email,
     required String password,
-    String? telefono,
+    required String tipoDocumento,
+    required String documento,
+    required String telefono,
+    required String direccion,
+    required String ciudad,
+    int idRol = 2,
   }) async {
     _loading = true;
     notifyListeners();
 
     try {
-      // TODO: Llamar al AuthService cuando esté implementado
-      // final result = await _authService.register(
-      //   nombre: nombre,
-      //   email: email,
-      //   password: password,
-      //   telefono: telefono,
-      // );
-      // _token = result['token'];
-      // final user = result['user'];
-      // _userId = user.idUsuario;
-      // _name = user.nombre;
-      // _role = user.rol;
-      // _authenticated = true;
+      // 1. Registrar usuario
+      await _authService.register(
+        nombres: nombres,
+        apellidos: apellidos,
+        email: email,
+        password: password,
+        tipoDocumento: tipoDocumento,
+        documento: documento,
+        telefono: telefono,
+        direccion: direccion,
+        ciudad: ciudad,
+        idRol: idRol,
+      );
 
-      await Future.delayed(const Duration(seconds: 1));
-      throw UnimplementedError('Registro aún no implementado');
+      // 2. Hacer login automáticamente
+      await login(email, password);
     } catch (e) {
+      _authenticated = false;
+      _token = null;
+      _user = null;
+      rethrow;
+    } finally {
       _loading = false;
       notifyListeners();
-      rethrow;
+    }
+  }
+
+  /// Cerrar sesión
+  Future<void> logout() async {
+    _loading = true;
+    notifyListeners();
+
+    try {
+      if (_token != null) {
+        try {
+          await _authService.logout(_token!);
+        } catch (_) {
+          // Ignorar errores en logout del servidor
+        }
+      }
+      await _secureStorage.delete(key: _tokenKey);
+      _authenticated = false;
+      _token = null;
+      _user = null;
     } finally {
       _loading = false;
       notifyListeners();
