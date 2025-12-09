@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:sidebarx/sidebarx.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
-import 'products/catalog_screen.dart';
+import 'products/product_list_screen.dart';
+
+import 'sales/sales_screen.dart';
+import 'orders/orders_screen.dart';
 
 /// Pantalla principal para administradores (con sidebar)
 class AdminMainScreen extends StatefulWidget {
@@ -165,7 +168,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       case 0:
         return const DashboardScreen();
       case 1:
-        return const CatalogScreen(); // Productos
+        return const ProductListScreen(); // Productos
       case 2:
         return const SalesScreen(); // Ventas
       case 3:
@@ -213,6 +216,8 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
+// Clase SalesScreen eliminada para usar la implementación real
+/*
 class SalesScreen extends StatelessWidget {
   const SalesScreen({super.key});
 
@@ -237,6 +242,7 @@ class SalesScreen extends StatelessWidget {
     );
   }
 }
+*/
 
 class ClientsScreen extends StatelessWidget {
   const ClientsScreen({super.key});
@@ -288,30 +294,30 @@ class CategoriesScreen extends StatelessWidget {
   }
 }
 
-class OrdersScreen extends StatelessWidget {
-  const OrdersScreen({super.key});
+// class OrdersScreen extends StatelessWidget {
+//   const OrdersScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.receipt_long, size: 80, color: AppColors.pinkDark),
-            const SizedBox(height: 16),
-            const Text(
-              'Pedidos',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text('Pantalla en desarrollo'),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(Icons.receipt_long, size: 80, color: AppColors.pinkDark),
+//             const SizedBox(height: 16),
+//             const Text(
+//               'Pedidos',
+//               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//             ),
+//             const SizedBox(height: 8),
+//             const Text('Pantalla en desarrollo'),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class SuppliersScreen extends StatelessWidget {
   const SuppliersScreen({super.key});

@@ -1,5 +1,9 @@
-// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../services/api_client.dart';
+
+class AuthProvider with ChangeNotifier {
+  final AuthService _authService = AuthService();
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
@@ -21,46 +25,17 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
   String? get token => _token;
 
-  /// Retorna el rol del usuario ('admin' o 'cliente')
-  String get role {
-    if (_user?.idRol == 1) {
-      return 'admin';
-    }
-    return 'cliente';
-  }
-
-  AuthProvider() {
-    _authService = AuthService();
-    checkAuth();
-  }
-
-
-  /// Verificar si hay una sesión guardada al iniciar la app
+  /// Inicializar y verificar si hay sesión guardada
   Future<void> checkAuth() async {
     _loading = true;
     notifyListeners();
 
     try {
-      final savedToken = await _secureStorage.read(key: _tokenKey);
-      if (savedToken != null) {
-        try {
-          // Validar el token obteniendo el perfil
-          final profile = await _authService.getProfile(savedToken);
-          _token = savedToken;
-          _user = profile;
-          _authenticated = true;
-        } catch (e) {
-          // Token inválido o expirado
-          await _secureStorage.delete(key: _tokenKey);
-          _authenticated = false;
-          _token = null;
-          _user = null;
-        }
-      } else {
-        _authenticated = false;
-        _token = null;
-        _user = null;
-      }
+      //Verificar token guardado en SharedPreferences
+      await Future.delayed(const Duration(milliseconds: 500));
+      _authenticated = false;
+      _token = null;
+      ApiClient.authToken = null;
     } catch (e) {
       _authenticated = false;
       _token = null;
@@ -77,29 +52,30 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Obtener token
-      final result = await _authService.login(email: email, password: password);
-      final token = result['token'] as String?;
+      await Future.delayed(const Duration(seconds: 1));
 
-      if (token == null) {
-        throw Exception('Token no recibido del servidor');
+      // Simulación: admin@test.com / cliente@test.com
+      if (email == 'admin@test.com' && password == '123456') {
+        _authenticated = true;
+        _name = 'Administrador';
+        _role = 'admin';
+        _userId = 1;
+        _token = 'fake-token-admin';
+      } else if (email == 'cliente@test.com' && password == '123456') {
+        _authenticated = true;
+        _name = 'Cliente Demo';
+        _role = 'cliente';
+        _userId = 2;
+        _token = 'fake-token-cliente';
+      } else {
+        throw Exception('Credenciales incorrectas (Demo)');
       }
 
-      // 2. Obtener perfil del usuario
-      _user = await _authService.getProfile(token);
-      _token = token;
+      // Aunque el token sea falso, lo seteamos por si la API pública lo requiere o lo ignora
+      ApiClient.authToken = _token;
 
-      // DEBUG
-      print('✅ Login exitoso');
-      print('📧 Email: ${_user?.email}');
-      print('👤 Nombre: ${_user?.nombreCompleto}');
-      print('🔑 ID Rol: ${_user?.idRol}');
-      print('👑 Rol: $role');
-
-      // 3. Guardar token en almacenamiento seguro
-      await _secureStorage.write(key: _tokenKey, value: token);
-
-      _authenticated = true;
+      notifyListeners();
+      return true;
     } catch (e) {
       print('❌ Error en login: $e');
       _authenticated = false;
@@ -129,27 +105,13 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Registrar usuario
-      await _authService.register(
-        nombres: nombres,
-        apellidos: apellidos,
-        email: email,
-        password: password,
-        tipoDocumento: tipoDocumento,
-        documento: documento,
-        telefono: telefono,
-        direccion: direccion,
-        ciudad: ciudad,
-        idRol: idRol,
-      );
+      await Future.delayed(const Duration(milliseconds: 300));
 
-      // 2. Hacer login automáticamente
-      await login(email, password);
-    } catch (e) {
       _authenticated = false;
       _token = null;
-      _user = null;
-      rethrow;
+      ApiClient.authToken = null;
+    } catch (e) {
+      debugPrint('Error al cerrar sesión: $e');
     } finally {
       _loading = false;
       notifyListeners();
@@ -162,17 +124,26 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_token != null) {
-        try {
-          await _authService.logout(_token!);
-        } catch (_) {
-          // Ignorar errores en logout del servidor
-        }
-      }
-      await _secureStorage.delete(key: _tokenKey);
-      _authenticated = false;
-      _token = null;
-      _user = null;
+      // Llamar al AuthService cuando esté implementado
+      // final result = await _authService.register(
+      //   nombre: nombre,
+      //   email: email,
+      //   password: password,
+      //   telefono: telefono,
+      // );
+      // _token = result['token'];
+      // final user = result['user'];
+      // _userId = user.idUsuario;
+      // _name = user.nombre;
+      // _role = user.rol;
+      // _authenticated = true;
+
+      await Future.delayed(const Duration(seconds: 1));
+      throw UnimplementedError('Registro aún no implementado');
+    } catch (e) {
+      _loading = false;
+      notifyListeners();
+      rethrow;
     } finally {
       _loading = false;
       notifyListeners();

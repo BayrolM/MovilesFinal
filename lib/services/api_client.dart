@@ -15,12 +15,39 @@ class ApiException implements Exception {
 class ApiClient {
   final String _baseUrl = baseUrl;
 
+  // Token global en memoria
+  static String? authToken;
+
   Map<String, String> _headers() {
-    return {'Content-Type': 'application/json', 'Accept': 'application/json'};
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (authToken != null) {
+      headers['Authorization'] = 'Bearer $authToken';
+    }
+    return headers;
   }
 
   dynamic _handleResponse(http.Response response) {
-    final responseBody = json.decode(response.body);
+    dynamic responseBody;
+    try {
+      responseBody = json.decode(response.body);
+    } catch (e) {
+      // Si falla el decode (ej: HTML error), lanzar excepción con el contenido crudo
+      // Intenta extraer el título si es HTML para ser menos ruidoso
+      String msg = response.body;
+      if (msg.contains('<title>') && msg.contains('</title>')) {
+        msg = msg.split('<title>')[1].split('</title>')[0];
+      }
+      // Limitar longitud
+      if (msg.length > 200) msg = msg.substring(0, 200) + '...';
+
+      throw ApiException(
+        'Error de servidor (${response.statusCode}): $msg',
+        response.statusCode,
+      );
+    }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return responseBody;
@@ -44,7 +71,7 @@ class ApiClient {
       final response = await http.get(uri, headers: _headers());
       return _handleResponse(response);
     } on SocketException {
-      throw ApiException('Error de red', 500);
+      throw ApiException('Error de red - Sin conexión', 0);
     } catch (e) {
       rethrow;
     }
@@ -60,7 +87,7 @@ class ApiClient {
       );
       return _handleResponse(response);
     } on SocketException {
-      throw ApiException('Error de red', 500);
+      throw ApiException('Error de red - Sin conexión', 0);
     } catch (e) {
       rethrow;
     }
